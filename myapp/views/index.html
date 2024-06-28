@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Details</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      /*background-image: url('../public/images/Ggg.jpg');*/
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #ffffff;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.2);
+      background-color: rgb(229, 229, 229);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 5px 8px 20px rgba(0, 0, 0, 2);
+      max-width: 400px;
+      width: 100%;
+      color: #333;
+      padding-right: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #c6c6c6;
+      border-radius: 10px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      font-size: 1rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      background: linear-gradient(135deg, #ffffff, #fff8fe);
+      outline: none;
+      box-shadow: 0 2px 5px rgba(47, 101, 163, 0.731);
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #4a90e2, #8e44ad);
+      
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 1s ease-in-out;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #8e44ad, #4a90e2);
+    }
+
+    .details {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .details p {
+      margin: 0.5rem 0;
+      color: #333;
+    }
+
+    .details p strong {
+      color: #4a90e2;
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="container">
+    <h1>Account Details</h1>
+    
+    <form id="balance-form">
+      <div class="form-group">
+        <label for="transaction_reference">Transaction Reference:</label>
+        <input type="text" id="transaction_reference" name="transaction_reference" required>
+        <span class="error" id="transaction_reference_error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="transaction_code">Transaction Code:</label>
+        <input type="text" id="transaction_code" name="transaction_code" required>
+        <span class="error" id="transaction_code_error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required>
+        <span class="error" id="amount_error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="narration">Narration:</label>
+        <input type="text" id="narration" name="narration" required>
+        <span class="error" id="narration_error"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" id="phone_number" name="phone_number" required>
+        <span class="error" id="phone_number_error"></span>
+      </div>
+
+      <button type="submit">Get Balance</button>
+    </form>
+    
+    <div class="details" id="account-details"></div>
+  </div>
+
+  <script>
+    document.getElementById('balance-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Clear previous error messages
+      document.querySelectorAll('.error').forEach(error => error.textContent = '');
+
+      const formData = {
+        transaction_reference: document.getElementById('transaction_reference').value,
+        transaction_code: document.getElementById('transaction_code').value,
+        amount: document.getElementById('amount').value,
+        narration: document.getElementById('narration').value,
+        phone_number: document.getElementById('phone_number').value
+      };
+
+      let hasError = false;
+
+      // Validate each field and display error message if empty
+      if (!formData.transaction_reference) {
+        document.getElementById('transaction_reference_error').textContent = 'Transaction Reference is required.';
+        hasError = true;
+      }
+      if (!formData.transaction_code) {
+        document.getElementById('transaction_code_error').textContent = 'Transaction Code is required.';
+        hasError = true;
+      }
+      if (!formData.amount) {
+        document.getElementById('amount_error').textContent = 'Amount is required.';
+        hasError = true;
+      }
+      if (!formData.narration) {
+        document.getElementById('narration_error').textContent = 'Narration is required.';
+        hasError = true;
+      }
+      if (!formData.phone_number) {
+        document.getElementById('phone_number_error').textContent = 'Phone Number is required.';
+        hasError = true;
+      }
+
+      if (hasError) {
+        return;
+      }
+
+      fetch('/balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        const accountDetailsDiv = document.getElementById('account-details');
+        accountDetailsDiv.innerHTML = `
+          <p><strong>Account Name:</strong> ${data.account_name}</p>
+          <p><strong>Actual Balance:</strong> ${data.actual_balance}</p>
+          <p><strong>Available Balance:</strong> ${data.available_balance}</p>
+        `;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>
